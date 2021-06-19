@@ -139,6 +139,8 @@ class UserLocation extends Controller
     private function parseLocation(string $data, string $coordinates) {
 
         $arData = json_decode($data, true);
+        $city = false;
+        $region = false;
 
         if ($arData['status'] !== 'OK') {
             return ['status' => $arData['status']];
