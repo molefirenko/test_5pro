@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
-class UserLocation extends Controller
+class LocationController extends Controller
 {
-    private $google_response = '
+    private $fakeGoogleResponse = '
     {
         "results" : [
            {
@@ -85,9 +85,10 @@ class UserLocation extends Controller
      * Get location by coordinates uses Geocoding API
      *
      * @param Request $request
-     * @return json
+     * @return string
      */
-    public function getAddressByCoordinates(Request $request) {
+    public function getAddressByCoordinates(Request $request): string
+    {
 
         $validator = Validator::make($request->all(), [
             'longitude' => 'required|numeric',
@@ -104,7 +105,7 @@ class UserLocation extends Controller
         $coord = implode(',', [$latitude, $longitude]);
 
         /*Http::fake([
-            '*' => Http::response($this->google_response, 200, ['Headers'])
+            '*' => Http::response($this->fakeGoogleResponse, 200, ['Headers'])
         ]);*/
 
         $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json',[
@@ -136,7 +137,8 @@ class UserLocation extends Controller
      * @param string $coordinates
      * @return array
      */
-    private function parseLocation(string $data, string $coordinates) {
+    private function parseLocation(string $data, string $coordinates): array
+    {
 
         $arData = json_decode($data, true);
         $city = false;
@@ -171,7 +173,8 @@ class UserLocation extends Controller
      * @param array $arLocation
      * @return array
      */
-    private function storeLocation(array $arLocation) {
+    private function storeLocation(array $arLocation): array
+    {
 
         $region = Region::firstOrCreate(['name' => $arLocation['region']]);
 
@@ -190,6 +193,55 @@ class UserLocation extends Controller
         }
 
         return [$region, $city, $location];
+    }
+
+    /**
+     * Get locations information
+     *
+     * @param int $id
+     * @return string
+     */
+    public function getLocationInformation($id = null): string
+    {
+        if ( isset($id) ) {
+            $data = $this->getRegionLocations($id);
+        }
+        else {
+            $data = $this->getAllLocations();
+        }
+
+        return response()->json($data);
+    }
+
+    /**
+     * Get all stored locations
+     *
+     * @return array
+     */
+    private function getAllLocations(): array
+    {
+        $locations = Location::all()->pluck('address')->toArray();
+        if (empty($locations)) {
+            return ['status' => 'Empty'];
+        }
+
+        return ['status' => 'OK', 'locations' => $locations];
+    }
+
+    /**
+     * Get locations by region id
+     *
+     * @param int $regionId
+     * @return array
+     */
+    private function getRegionLocations(int $regionId): array
+    {
+        $locations = Location::where('region_id', $regionId)->pluck('address')->toArray();
+        if (empty($locations)) {
+            return ['status' => 'Empty'];
+        }
+
+        return ['status' => 'OK', 'locations' => $locations];
     }
 
 }

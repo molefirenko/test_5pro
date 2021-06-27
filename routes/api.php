@@ -2,8 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserLocation;
-use App\Http\Controllers\LocationStatistics;
+use App\Http\Controllers\LocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::post('/location', [UserLocation::class, 'getAddressByCoordinates']);
+Route::post('/location', [LocationController::class, 'getAddressByCoordinates']);
 
 
-Route::get('/storedLocations/{id?}', [LocationStatistics::class, 'getLocationInformation']);
+Route::get('/storedLocations/{id?}', [LocationController::class, 'getLocationInformation']);
