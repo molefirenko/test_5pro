@@ -47,7 +47,7 @@ class LocationController extends Controller
      * @param int $id
      * @return string
      */
-    public function getLocationInformation($id = null): string
+    public function getLocationInformation(int $id = null): string
     {
         if (isset($id)) {
             $data = $this->getRegionLocations($id);
